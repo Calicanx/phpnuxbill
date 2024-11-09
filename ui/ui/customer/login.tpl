@@ -41,7 +41,7 @@
                                         class="glyphicon glyphicon-user"></i></span>
                             {/if}
                             <input type="text" class="form-control" name="username"
-                                placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{elseif $_c['registration_username'] == 'email'}{Lang::T('Email')}{else}{Lang::T('Username')}{/if}">
+                                placeholder="0712345678">
                         </div>
                     </div>
                     <div class="form-group">
@@ -76,9 +76,6 @@
                     <center>
                         <a href="{$_url}forgot" class="btn btn-link">{Lang::T('Forgot Password')}</a>
                         <br>
-                        <a href="javascript:showPrivacy()">Privacy</a>
-                        &bull;
-                        <a href="javascript:showTaC()">T &amp; C</a>
                     </center>
                 </form>
             </div>

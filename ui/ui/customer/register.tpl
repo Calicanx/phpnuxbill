@@ -37,8 +37,8 @@
                                     <span class="input-group-addon" id="basic-addon1"><i
                                             class="glyphicon glyphicon-user"></i></span>
                                 {/if}
-                                <input type="text" class="form-control" name="username"
-                                    placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{elseif $_c['registration_username'] == 'email'}{Lang::T('Email')}{else}{Lang::T('Username')}{/if}">
+                                <input id="username" type="text" class="form-control" name="username"
+                                    placeholder="0712345678">
                             </div>
                         </div>
                         <div class="md-input-container md-float-label">
@@ -46,14 +46,21 @@
                             <input type="text" required class="form-control" id="fullname" value="{$fullname}"
                                 name="fullname">
                         </div>
-                        <div class="md-input-container md-float-label">
-                            <label>{Lang::T('Email')}</label>
-                            <input type="text" class="form-control" id="email" placeholder="xxxxxxx@xxxx.xx"
+                        <div   class="md-input-container md-float-label">
+                            <label  style="display: none">{Lang::T('Email')}</label>
+                            <input type="hidden" class="form-control" id="email" placeholder="xxxxxxx@xxxx.xx"
                                 value="{$email}" name="email">
+                            <script>
+                                // use the username as email but add @reduzer.tech to the end.
+                                // efforts for simplifying the onboarding process
+                                document.getElementById('username').addEventListener('input', function () {
+                                    document.getElementById('email').value = this.value + '@reduzer.tech';
+                                });
+                            </script>
                         </div>
-                        <div class="md-input-container md-float-label">
+                        <div style="display: none" class="md-input-container md-float-label">
                             <label>{Lang::T('Address')}</label>
-                            <input type="text" name="address" id="address" value="{$address}" class="form-control">
+                            <input type="text" name="address" id="address" value="Nyamarambe" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -82,11 +89,6 @@
                             </div>
                         </div>
                         <br>
-                        <center>
-                            <a href="javascript:showPrivacy()">Privacy</a>
-                            &bull;
-                            <a href="javascript:showTaC()">T &amp; C</a>
-                        </center>
                     </div>
                 </div>
             </div>

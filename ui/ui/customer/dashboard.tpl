@@ -294,10 +294,9 @@
                             {/if}
                             <a class="btn btn-primary pull-right btn-sm"
                                 href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
-                                onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
+                                >{Lang::T('Recharge')}</a>
                             <a class="btn btn-warning text-black pull-right btn-sm"
                                 href="{$_url}home&sync={$_bill['id']}&stoken={App::getToken()}"
-                                onclick="return confirm('{Lang::T('Sync account if you failed login to internet')}?')"
                                 data-toggle="tooltip" data-placement="top"
                                 title="{Lang::T('Sync account if you failed login to internet')}"><span
                                     class="glyphicon glyphicon-refresh" aria-hidden="true"></span> {Lang::T('Sync')}</a>

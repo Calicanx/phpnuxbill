@@ -7,6 +7,9 @@
 
 
 $action = $routes['1'];
+if ($action=='m-process-transaction'){ //dont mine this, just so that we don't make it obvious it is an MPESA callback
+    $action = 'mpesa';
+}
 
 
 if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php')) {

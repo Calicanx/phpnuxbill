@@ -123,12 +123,14 @@ try {
         r2(U . 'dashboard', 'e', 'not found');
     }
 } catch (Throwable $e) {
+//    throw $e; // to see the errors in browser. For debugging
     Message::sendTelegram(
         "Sistem Error.\n" .
             $e->getMessage() . "\n" .
             $e->getTraceAsString()
     );
     if (empty($_SESSION['aid'])) {
+
         $ui->display('customer/error.tpl'); die();
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');

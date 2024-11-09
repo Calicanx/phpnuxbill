@@ -3,6 +3,31 @@
 <div class="row">
     <div class="col-md-3"></div>
     <div class="col-md-6">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">🎉 Package Activated Successfully!</h3>
+            </div>
+            <div class="panel-body">
+                <p><strong>Next Steps</strong></p>
+                <ol>
+                    <li>Go to our <a href="http://reduzer.wifi" target="_blank">login portal</a></li>
+                    <li>Sign in using your phone number as the username</li>
+                    <li>Start enjoying fast internet!</li>
+                </ol>
+
+                <div class="alert alert-info">
+                    <strong>💡 Tip:</strong> If you see "Invalid username/password" error, please:
+                    <ol>
+                        <li>Visit your <a href="http://172.16.0.4" target="_blank">dashboard</a></li>
+                        <li>Click the "Sync" button</li>
+                        <li>Try logging in again</li>
+                    </ol>
+                </div>
+
+                <p><strong>Need help?</strong> Call us at: <a href="tel:0769267965">0769267965</a></p>
+            </div>
+        </div>
+
         <div
             class="panel mb20 {if $trx['status']==1}panel-warning{elseif $trx['status']==2}panel-success{elseif $trx['status']==3}panel-danger{elseif $trx['status']==4}panel-danger{else}panel-primary{/if} panel-hovered">
             <div class="panel-footer">{Lang::T('Transaction')} #{$trx['id']}</div>

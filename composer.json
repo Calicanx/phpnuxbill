@@ -12,5 +12,9 @@
             "homepage": "https://ibnux.net",
             "role": "Developer"
         }
-    ]
+    ],
+  "require": {
+    "ext-curl": "*",
+    "ext-http": "*"
+  }
 }
