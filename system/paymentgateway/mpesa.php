@@ -277,8 +277,6 @@ function mpesa_create_transaction($trx, $user, $phone)
 
 
         $callback_url = U . 'callback/m-process-transaction/' . $trx['id'];
-        $callback_url = "https://605d-91-102-180-9.ngrok-free.app" ."/index.php?_route=callback/m-process-transaction/" .$trx['id'];
-
 
 
         $result = $mpesa->sendStkPush(
