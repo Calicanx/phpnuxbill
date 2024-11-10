@@ -937,5 +937,21 @@
     "Account_already_exists": "Account already exists",
     "Save_Change": "Save Change",
     "If_your_Username_is_found__Verification_Code_has_been_Sent_to_Your_Phone_Email_Whatsapp": "If your Username is found, Verification Code has been Sent to Your Phone\/Email\/Whatsapp",
-    "Installed_Devices": "Installed Devices"
+    "Installed_Devices": "Installed Devices",
+    "Already_have_an_account_": "Already have an account?",
+    "Register_New_Account": "Register New Account",
+    "Register_as_New_Member": "Register as New Member",
+    "Create_My_Account": "Create My Account",
+    "Login_to_Your_Account": "Login to Your Account",
+    "Choose_Your_Internet_Package": "Choose Your Internet Package",
+    "Buy_Now": "Buy Now",
+    "Quick_MPesa_Payment": "Quick MPesa Payment",
+    "Amount_to_Pay": "Amount to Pay",
+    "Your_MPesa_Number": "Your MPesa Number",
+    "Pay_Now_with_MPesa": "Pay Now with MPesa",
+    "Duration": "Duration",
+    "Validity_Period": "Validity Period",
+    "Package_Activated_": "Package Activated!",
+    "Connect_to_Internet": "Connect to Internet",
+    "web_browser_did_not_send_challenge_response__try_again__enable_JavaScript_": "web browser did not send challenge response (try again, enable JavaScript)"
 }

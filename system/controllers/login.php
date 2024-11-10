@@ -43,7 +43,7 @@ switch ($do) {
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
                     _log($username . ' ' . Lang::T('Login Successful'), 'User', $d['id']);
-                    _alert(Lang::T('Login Successful'), 'success', "home");
+                    _alert(Lang::T('Login Successful'), 'success', "home&mikrotik=login");
                 } else {
                     _msglog('e', Lang::T('Invalid Username or Password'));
                     _log($username . ' ' . Lang::T('Failed Login'), 'User');

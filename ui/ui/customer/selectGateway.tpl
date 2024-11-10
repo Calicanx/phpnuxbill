@@ -1,75 +1,71 @@
 {include file="customer/header.tpl"}
-{*<script src="/ui/ui/scripts/vue.runtime.global.prod.js"></script>*}
 <script src="/ui/ui/scripts/vue.global.js"></script>
-{*<script src="/ui/ui/scripts/vue.global.js"></script>*}
 
 <div class="row" id="mpesaApp">
-    <div class="col-md-7">
-        <div class="panel panel-primary panel-hovered">
-            <div class="panel-heading">{Lang::T('Mpesa Payment')}</div>
-            <div class="panel-body">
-                <div class="payment-form">
-                    <div class="alert alert-info mb-3">
-                        <i class="fa fa-info-circle"></i> {Lang::T('Enter your M-Pesa phone number to complete the payment')}
-                    </div>
-
-                    <form v-on:submit.prevent="initiatePayment" class="mb-3">
-                        <div class="form-group">
-                            <label>{Lang::T('Phone Number')}</label>
-                            <input type="text"
-                                   class="form-control"
-                                   v-bind:class="[phoneError ? 'is-invalid' : '']"
-                                   v-model="phone"
-                                   maxlength="10"
-                                   placeholder="0712345678"
-                                   v-bind:disabled="isProcessing"
-                                   required>
-                            <small class="help-block">Format: 07XXXXXXXX or 01XXXXXXXX</small>
-                            <div class="text-danger" v-show="phoneError" v-text="phoneError"></div>
-                        </div>
-
-                        <input type="hidden" name="plan_id" value="{$plan['id']}">
-                        <input type="hidden" name="gateway" value="mpesa">
-
-                        <button type="submit"
-                                class="btn btn-primary btn-lg btn-block"
-                                v-bind:disabled="!isValidPhone || isProcessing">
-                            <i class="fa fa-money"></i> {Lang::T('Pay with M-Pesa')}
-                        </button>
-                    </form>
-
-                    <div v-show="statusMessage"
-                         v-bind:class="['alert', alertClass]">
-                        <div class="text-center">
-                            <div>
-                                <i v-bind:class="['fa', 'fa-2x', statusIcon]"></i>
-                            </div>
-                            <p class="mt-2" v-text="statusMessage"></p>
-                            <button v-show="paymentFailed"
-                                    v-on:click="resetPayment"
-                                    class="btn btn-primary mt-2">
-                                Try Again
-                            </button>
-                        </div>
-                    </div>
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading text-center">
+                <h4 style="margin: 0; font-size: 20px;">{Lang::T('Pay with M-Pesa')}</h4>
+            </div>
+            <div class="panel-body" style="padding: 25px;">
+                <!-- Amount Display -->
+                <div class="text-center" style="margin-bottom: 25px;">
+                    <h3 style="color: #666; margin:0 0 5px 0;">{$plan['name_plan']}</h3>
+                    <h2 style="margin: 0; color: #2196F3; font-size: 36px;">
+                        {Lang::moneyFormat($plan['price']+$tax+$add_cost)}
+                    </h2>
+                    <p style="margin: 5px 0 0 0; color: #666;">
+                        {$plan['validity']} {$plan['validity_unit']}
+                    </p>
                 </div>
 
-                <div class="mt-4">
-                    <h4>{Lang::T('Instructions')}:</h4>
-                    <ol>
-                        <li>{Lang::T('Enter your M-Pesa phone number above')}</li>
-                        <li>{Lang::T('Click Pay with M-Pesa button')}</li>
-                        <li>{Lang::T('You will receive a payment prompt on your phone')}</li>
-                        <li>{Lang::T('Enter your M-Pesa PIN to complete payment')}</li>
-                    </ol>
+                <!-- Payment Form -->
+                <form v-on:submit.prevent="initiatePayment">
+                    <div class="form-group">
+                        <input type="text"
+                               class="form-control input-lg text-center"
+                               v-bind:class="[phoneError ? 'is-invalid' : '']"
+                               v-model="phone"
+                               maxlength="10"
+                               placeholder="Enter M-Pesa number (07XX XXX XXX)"
+                               v-bind:disabled="isProcessing"
+                               style="font-size: 18px; height: 50px;"
+                               required>
+                        <div class="text-danger text-center"
+                             v-show="phoneError"
+                             v-text="phoneError"
+                             style="margin-top: 5px;">
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="plan_id" value="{$plan['id']}">
+                    <input type="hidden" name="gateway" value="mpesa">
+
+                    <!-- Pay Button -->
+                    <button type="submit"
+                            class="btn btn-success btn-lg btn-block"
+                            style="font-size: 18px; padding: 12px; margin-top: 20px;"
+                            v-bind:disabled="!isValidPhone || isProcessing">
+                        <i class="fa fa-money"></i> {Lang::T('Pay Now')}
+                    </button>
+                </form>
+
+                <!-- Status Messages -->
+                <div v-show="statusMessage"
+                     v-bind:class="['alert', alertClass]"
+                     style="margin-top: 20px; text-align: center;">
+                    <div>
+                        <i v-bind:class="['fa', 'fa-2x', statusIcon]"></i>
+                        <p style="margin-top: 10px;" v-text="statusMessage"></p>
+                        <button v-show="paymentFailed"
+                                v-on:click="resetPayment"
+                                class="btn btn-primary">
+                            Try Again
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Order Summary Panel -->
-    <div class="col-md-5">
-        {* ... existing order summary code ... *}
     </div>
 </div>
 
@@ -162,10 +158,17 @@
                             switch (result.status) {
                                 case 'COMPLETED':
                                     stopStatusCheck();
-                                    statusMessage.value = 'Payment successful! Redirecting...';
-                                    setTimeout(() => {
-                                        window.location.href = '{$_url}order/view/' + transactionId.value;
-                                    }, 2000);
+
+                                    statusMessage.value = 'Payment successful! Please wait while we sync your account...';
+                                    $.ajax({
+                                        url: '{$_url}home&sync=1&stoken={App::getToken()}',
+                                        method: 'GET'
+                                    }).then(() => {
+
+                                        setTimeout(() => {
+                                            window.location.href = '{$_url}home&mikrotik=login';
+                                        }, 2000);
+                                    });
                                     break;
 
                                 case 'FAILED':

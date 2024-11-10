@@ -93,7 +93,12 @@ switch ($do) {
             $d->phonenumber = $phone_number;
             if ($d->save()) {
                 $user = $d->id();
-                r2(U . 'login', 's', Lang::T('Register Success! You can login now'));
+
+                $_SESSION['uid'] = $user;
+                User::setCookie($user);
+                $d->last_login = date('Y-m-d H:i:s');
+                $d->save();
+                r2(U . 'order/package', 's', Lang::T('Register Success! You can login now'));
             } else {
                 $ui->assign('username', $username);
                 $ui->assign('fullname', $fullname);

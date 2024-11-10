@@ -1,99 +1,120 @@
 {include file="customer/header-public.tpl"}
 
-<div class="hidden-xs" style="height:100px"></div>
-<div class="row">
-    <div class="col-sm-6 col-sm-offset-1">
-        <div class="panel panel-info">
-            <div class="panel-heading">{Lang::T('Announcement')}</div>
-            <div class="panel-body">
-                {$Announcement = "{$PAGES_PATH}/Announcement.html"}
-                {if file_exists($Announcement)}
-                    {include file=$Announcement}
-                {/if}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+
+
+        <div class="col-md-12 mb-3">
+            <div class="alert" style="background: #1976D2; margin-bottom: 15px; border-radius: 6px; padding: 10px 15px;">
+                <div class="text-center">
+                    <span style="color: #FDD835; font-weight: bold; font-size: 16px;">
+                        🔥 FLASH OFFER:
+                    </span>
+                    <span style="color: white; font-size: 16px;">
+                        Create an account now and get Unlimited Internet for just
+                        <span style="color: #FDD835; font-weight: bold; font-size: 18px;">Ksh 10/=</span>
+                        per day!
+                    </span>
+                    <span style="color: #FDD835; font-weight: bold;">
+                        ⚡ Limited time offer!
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-sm-4">
-        <div class="panel panel-primary">
-            <div class="panel-heading">{Lang::T('Log in to Member Panel')}</div>
-            <div class="panel-body">
-                <form action="{$_url}login/post" method="post">
-                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
-                    <div class="form-group">
-                        <label>
-                            {if $_c['registration_username'] == 'phone'}
-                                {Lang::T('Phone Number')}
-                            {elseif $_c['registration_username'] == 'email'}
-                                {Lang::T('Email')}
-                            {else}
-                                {Lang::T('Username')}
-                            {/if}
-                        </label>
-                        <div class="input-group">
-                            {if $_c['registration_username'] == 'phone'}
-                                <span class="input-group-addon" id="basic-addon1"><i
-                                        class="glyphicon glyphicon-phone-alt"></i></span>
-                            {elseif $_c['registration_username'] == 'email'}
-                                <span class="input-group-addon" id="basic-addon1"><i
-                                        class="glyphicon glyphicon-envelope"></i></span>
-                            {else}
-                                <span class="input-group-addon" id="basic-addon1"><i
-                                        class="glyphicon glyphicon-user"></i></span>
-                            {/if}
-                            <input type="text" class="form-control" name="username"
-                                placeholder="0712345678">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>{Lang::T('Password')}</label>
-                        <div class="input-group">
-                            <span class="input-group-addon" id="basic-addon2"><i
-                                    class="glyphicon glyphicon-lock"></i></span>
-                            <input type="password" class="form-control" name="password"
-                                placeholder="{Lang::T('Password')}">
-                        </div>
-                    </div>
+        <div class="col-md-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title" style="font-size: 18px">{Lang::T('Log in to Member Panel')}</h3>
+                </div>
+                <div class="panel-body">
+                    <form action="{$_url}login/post" method="post">
+                        <input type="hidden" name="csrf_token" value="{$csrf_token}">
 
-                    <div class="clearfix hidden">
-                        <div class="ui-checkbox ui-checkbox-primary right">
-                            <label>
-                                <input type="checkbox">
-                                <span>Remember me</span>
+                        <!-- Username/Phone Field -->
+                        <div class="form-group">
+                            <label style="font-size: 16px">
+                                {if $_c['registration_username'] == 'phone'}
+                                    {Lang::T('Phone Number')}
+                                {elseif $_c['registration_username'] == 'email'}
+                                    {Lang::T('Email')}
+                                {else}
+                                    {Lang::T('Username')}
+                                {/if}
                             </label>
-                        </div>
-                    </div>
-                    <div class="btn-group btn-group-justified mb15">
-                        {if $_c['disable_registration'] != 'noreg'}
-                            <div class="btn-group">
-                                <a href="{$_url}register" class="btn btn-success">{Lang::T('Register')}</a>
+                            <div class="input-group">
+                                <span class="input-group-addon" style="background-color: #f8f9fa">
+                                    {if $_c['registration_username'] == 'phone'}
+                                        <i class="glyphicon glyphicon-phone-alt"></i>
+                                    {elseif $_c['registration_username'] == 'email'}
+                                        <i class="glyphicon glyphicon-envelope"></i>
+                                    {else}
+                                        <i class="glyphicon glyphicon-user"></i>
+                                    {/if}
+                                </span>
+                                <input type="text"
+                                       class="form-control input-lg"
+                                       name="username"
+                                       placeholder="Enter your phone number here, for example: 0712345678"
+                                       style="font-size: 16px; height: 46px;">
                             </div>
-                        {/if}
-                        <div class="btn-group">
-                            <button type="submit" class="btn btn-primary">{Lang::T('Login')}</button>
                         </div>
-                    </div>
-                    <br>
-                    <center>
-                        <a href="{$_url}forgot" class="btn btn-link">{Lang::T('Forgot Password')}</a>
-                        <br>
-                    </center>
-                </form>
+
+                        <!-- Password Field -->
+                        <div class="form-group">
+                            <label style="font-size: 16px">{Lang::T('Password')}</label>
+                            <div class="input-group">
+                                <span class="input-group-addon" style="background-color: #f8f9fa">
+                                    <i class="glyphicon glyphicon-lock"></i>
+                                </span>
+                                <input type="password"
+                                       class="form-control input-lg"
+                                       name="password"
+                                       placeholder="Type your password here"
+                                       style="font-size: 16px; height: 46px;">
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block" style="font-size: 16px">
+                                <i class="glyphicon glyphicon-log-in"></i> {Lang::T('Login')}
+                            </button>
+                        </div>
+
+                        <!-- Additional Links -->
+                        <div class="text-center mt-4" style="font-size: 16px">
+                            <a href="{$_url}forgot" class="btn btn-link btn-lg" style="font-size: 16px">
+                                <i class="glyphicon glyphicon-question-sign"></i> {Lang::T('Forgot Password')}
+                            </a>
+
+                            {if $_c['disable_registration'] != 'noreg'}
+                                <div class="mt-3">
+                                    <p>Don't have an account yet?</p>
+                                    <a href="{$_url}register" class="btn btn-success btn-lg" style="font-size: 16px">
+                                        <i class="glyphicon glyphicon-user"></i> {Lang::T('Register New Account')}
+                                    </a>
+                                </div>
+                            {/if}
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Keep the modal for announcements -->
 <div class="modal fade" id="HTMLModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="font-size: 24px">&times;</span>
+                </button>
             </div>
             <div class="modal-body" id="HTMLModal_konten"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">&times;</button>
+                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">&times;</button>
             </div>
         </div>
     </div>
