@@ -1,6 +1,163 @@
 {include file="customer/header.tpl"}
 <!-- user-dashboard -->
 
+<div id="authApp">
+    {if isset($hostname) && $hchap == 'true' && $_c['hs_auth_method'] == 'hchap'}
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 text-center">
+                <div class="panel panel-primary">
+                    <div class="panel-body" style="padding: 25px;">
+                        <h3>
+                            <i class="fa fa-wifi"></i> Connecting to Internet...
+                        </h3>
+                        <div class="progress" style="height: 10px; margin: 20px 0;">
+                            <div class="progress-bar progress-bar-striped active"
+                                 role="progressbar"
+                                 style="width: 100%">
+                            </div>
+                        </div>
+                        <p id="statusMessage">Please wait while we connect you...</p>
+                        <div id="retryButton" style="display: none; margin-top: 15px;">
+                            <button onclick="window.location.reload()" class="btn btn-primary">
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="/ui/ui/scripts/md5.js"></script>
+        <script type="text/javascript">
+            (function() {
+                var hostname = "http://{$hostname}/login";
+                var user = "{$_user['username']}";
+                var pass = "{$_user['password']}";
+                var dst = "{$apkurl}";
+                var key = hexMD5('{$key1}' + pass + '{$key2}');
+                var isAuthComplete = false;
+
+                var authUrl = hostname + '?username=' + encodeURIComponent(user) +
+                    '&dst=' + encodeURIComponent(dst) +
+                    '&password=' + encodeURIComponent(key);
+
+                var authFrame = document.createElement('iframe');
+                authFrame.style.display = 'none';
+                document.body.appendChild(authFrame);
+
+                function updateStatus(message, showRetry) {
+                    document.getElementById('statusMessage').innerText = message;
+                }
+
+                async function checkConnection() {
+                    if (isAuthComplete) return false;
+
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                        const response = await fetch('https://www.google.com/generate_204', {
+                            mode: 'no-cors',
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+                        return true;
+                    } catch (error) {
+                        if (error.name === 'AbortError') {
+                            console.log('Connection check timed out');
+                        }
+                        return false;
+                    }
+                }
+
+                function cleanup() {
+                    if (authFrame) {
+                        authFrame.remove();
+                        authFrame = null;
+                    }
+                }
+
+                function handleSuccess() {
+                    if (!isAuthComplete) {
+                        isAuthComplete = true;
+                        cleanup();
+                        updateStatus('Connected successfully');
+                    }
+                }
+
+                async function tryAuthentication(attempt) {
+                    if (isAuthComplete) return true;
+
+                    return new Promise(async function(resolve) {
+                        updateStatus('Attempt ' + attempt + ' of 3: Connecting to network...');
+                        authFrame.src = authUrl;
+
+                        await new Promise(r => setTimeout(r, 3000));
+
+                        for (let check = 0; check < 3; check++) {
+                            if (isAuthComplete) {
+                                resolve(true);
+                                return;
+                            }
+
+                            const isConnected = await checkConnection();
+                            if (isConnected) {
+                                handleSuccess();
+                                resolve(true);
+                                return;
+                            }
+
+                            await new Promise(r => setTimeout(r, 1000));
+                        }
+
+                        resolve(false);
+                    });
+                }
+
+                async function authenticate() {
+                    try {
+                        const initialConnection = await checkConnection();
+                        if (initialConnection) {
+                            handleSuccess();
+                            return;
+                        }
+
+                        for (let i = 1; i <= 3; i++) {
+                            if (await tryAuthentication(i)) {
+                                return;
+                            }
+
+                            if (i < 3 && !isAuthComplete) {
+                                await new Promise(r => setTimeout(r, 2000));
+                            }
+                        }
+
+                        if (!isAuthComplete) {
+                            updateStatus(
+                                'Unable to connect. Please ensure you have an active subscription or contact support.',
+                                true
+                            );
+                            cleanup();
+                        }
+
+                    } catch (error) {
+                        if (!isAuthComplete) {
+                            console.error('Auth error:', error);
+                            updateStatus(
+                                'Connection error. Please check your subscription or contact support.',
+                                true
+                            );
+                            cleanup();
+                        }
+                    }
+                }
+
+                authenticate();
+            })();
+        </script>
+    {/if}
+</div>
 <div class="row">
     <div class="col col-md-6 col-md-push-6">
         {if $unpaid }
@@ -253,31 +410,7 @@
                             <td class="small mb15">{$nux_mac}</td>
                         </tr>
                     {/if}
-                    {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on' && $_bill['routers'] != 'radius' &&
-                    $_c['hs_auth_method'] != 'hchap'}
-                    <tr>
-                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
-                        <td class="small mb15" id="login_status_{$_bill['id']}">
-                            <img src="ui/ui/images/loading.gif">
-                        </td>
-                    </tr>
-                    {/if}
-                    {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on' && $_c['hs_auth_method'] == 'hchap'}
-                        <tr>
-                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
-                            <td class="small mb15">
-                                {if $logged == '1'}
-                                    <a href="http://{$hostname}/status" class="btn btn-success btn-xs btn-block">{Lang::T('You
-                                are
-                                Online, Check Status')}</a>
-                                {else}
-                                    <a href="{$_url}home&mikrotik=login"
-                                        onclick="return confirm('{Lang::T('Connect to Internet')}')"
-                                        class="btn btn-danger btn-xs btn-block">{Lang::T('Not Online, Login now?')}</a>
-                                {/if}
-                            </td>
-                        </tr>
-                    {/if}
+
                     <tr>
                         <td class="small text-primary text-uppercase text-normal">
                             {if $_bill['status'] == 'on' && $_bill['prepaid'] != 'YES'}
@@ -294,10 +427,9 @@
                             {/if}
                             <a class="btn btn-primary pull-right btn-sm"
                                 href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
-                                onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
+                                >{Lang::T('Recharge')}</a>
                             <a class="btn btn-warning text-black pull-right btn-sm"
                                 href="{$_url}home&sync={$_bill['id']}&stoken={App::getToken()}"
-                                onclick="return confirm('{Lang::T('Sync account if you failed login to internet')}?')"
                                 data-toggle="tooltip" data-placement="top"
                                 title="{Lang::T('Sync account if you failed login to internet')}"><span
                                     class="glyphicon glyphicon-refresh" aria-hidden="true"></span> {Lang::T('Sync')}</a>
@@ -430,17 +562,5 @@
         {/if}
     </div>
 </div>
-{if isset($hostname) && $hchap == 'true' && $_c['hs_auth_method'] == 'hchap'}
-    <script type="text/javascript" src="/ui/ui/scripts/md5.js"></script>
-    <script type="text/javascript">
-        var hostname = "http://{$hostname}/login";
-        var user = "{$_user['username']}";
-        var pass = "{$_user['password']}";
-        var dst = "{$apkurl}";
-        var authdly = "2";
-        var key = hexMD5('{$key1}' + pass + '{$key2}');
-        var auth = hostname + '?username=' + user + '&dst=' + dst + '&password=' + key;
-        document.write('<meta http-equiv="refresh" target="_blank" content="' + authdly + '; url=' + auth + '">');
-    </script>
-{/if}
+
 {include file="customer/footer.tpl"}

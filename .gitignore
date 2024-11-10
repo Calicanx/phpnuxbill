@@ -15,7 +15,9 @@ system/paymentgateway/ui/**
 system/paymentgateway/**
 !system/paymentgateway/ui/
 !system/paymentgateway/ui/index.html
+!system/paymentgateway/ui/mpesa.tpl
 !system/paymentgateway/index.html
+!system/paymentgateway/mpesa.php
 !system/plugin/ui/
 system/plugin/ui/*
 !system/plugin/ui/index.html

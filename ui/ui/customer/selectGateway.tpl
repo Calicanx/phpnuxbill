@@ -1,125 +1,274 @@
 {include file="customer/header.tpl"}
+<script src="/ui/ui/scripts/vue.global.js"></script>
 
-<div class="row">
-    {if file_exists("$PAGES_PATH/Payment_Info.html")}
-        <div class="col-md-6">
-            <div class="panel panel-warning panel-hovered">
-                <div class="panel-heading">{Lang::T('Payment Info')}</div>
-                <div class="panel-body">{include file="$PAGES_PATH/Payment_Info.html"}</div>
+<div class="row" id="mpesaApp">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading text-center">
+                <h4 style="margin: 0; font-size: 20px;">{Lang::T('Pay with M-Pesa')}</h4>
             </div>
-        </div>
-    {/if}
-    <div class="{if file_exists("$PAGES_PATH/Payment_Info.html")}col-md-6{else}col-md-6 col-md-offset-3{/if}">
-        <div class="panel panel-success panel-hovered">
-            <div class="panel-heading">{Lang::T('Available Payment Gateway')}</div>
-            <div class="panel-footer">
-                <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">
-                    <div class="form-group row">
-                        <label class="col-md-4">{Lang::T('Payment Gateway')}</label>
-                        <div class="col-md-8">
-                            <select name="gateway" id="gateway" class="form-control">
-                                {foreach $pgs as $pg}
-                                    <option value="{$pg}">
-                                        {ucwords($pg)}</option>
-                                {/foreach}
-                            </select>
+            <div class="panel-body" style="padding: 25px;">
+                <!-- Amount Display -->
+                <div class="text-center" style="margin-bottom: 25px;">
+                    <h3 style="color: #666; margin:0 0 5px 0;">{$plan['name_plan']}</h3>
+                    <h2 style="margin: 0; color: #2196F3; font-size: 36px;">
+                        {Lang::moneyFormat($plan['price']+$tax+$add_cost)}
+                    </h2>
+                    <p style="margin: 5px 0 0 0; color: #666;">
+                        {$plan['validity']} {$plan['validity_unit']}
+                    </p>
+                </div>
+
+                <!-- Payment Form -->
+                <form v-on:submit.prevent="initiatePayment">
+                    <div class="form-group">
+                        <input type="text"
+                               class="form-control input-lg text-center"
+                               v-bind:class="[phoneError ? 'is-invalid' : '']"
+                               v-model="phone"
+                               maxlength="10"
+                               placeholder="Enter M-Pesa number (07XX XXX XXX)"
+                               v-bind:disabled="isProcessing"
+                               style="font-size: 18px; height: 50px;"
+                               required>
+                        <div class="text-danger text-center"
+                             v-show="phoneError"
+                             v-text="phoneError"
+                             style="margin-top: 5px;">
                         </div>
                     </div>
-            </div>
-            <div class="panel-body">
-                <center><b>{Lang::T('Package Details')}</b></center>
-                <ul class="list-group list-group-unbordered">
-                    <li class="list-group-item">
-                        <b>{Lang::T('Plan Name')}</b> <span class="pull-right">{$plan['name_plan']}</span>
-                    </li>
-                    {if $plan['is_radius'] or $plan['routers']}
-                        <li class="list-group-item">
-                            <b>{Lang::T('Location')}</b> <span class="pull-right">{if
-                                $plan['is_radius']}Radius{else}{$plan['routers']}
-                            {/if}</span>
-                    </li>
-                    {/if}
-                    <li class="list-group-item">
-                        <b>{Lang::T('Type')}</b> <span class="pull-right">{if $plan['prepaid'] eq
-                            'yes'}{Lang::T('Prepaid')}{else}{Lang::T('Postpaid')}
-                            {/if}
-                            {$plan['type']}</span>
-                    </li>
-                    <li class="list-group-item">
-                        <b>{Lang::T('Plan Price')}</b> <span class="pull-right">
-                        {if !empty($plan['price_old'])}
-                            <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                {/if}
-                        {Lang::moneyFormat($plan['price'])}
-                        </span>
-                    </li>
-                    {if $plan['validity']}
-                        <li class="list-group-item">
-                            <b>{Lang::T('Validity Periode')}</b> <span class="pull-right">{$plan['validity']}
-                                {$plan['validity_unit']}</span>
-                        </li>
-                    {/if}
-                </ul>
-                <center><b>{Lang::T('Summary')}</b></center>
-                <ul class="list-group list-group-unbordered">
-                    {if $tax}
-                        <li class="list-group-item">
-                            <b>{Lang::T('Tax')}</b> <span class="pull-right">{Lang::moneyFormat($tax)}</span>
-                        </li>
-                        {if $add_cost!=0}
-                            {foreach $bills as $k => $v}
-                                <li class="list-group-item">
-                                    <b>{$k}</b> <span class="pull-right">{Lang::moneyFormat($v)}</span>
-                                </li>
-                            {/foreach}
-                            <li class="list-group-item">
-                                <b>{Lang::T('Additional Cost')}</b> <span
-                                    class="pull-right">{Lang::moneyFormat($add_cost)}</span>
-                            </li>
-                            <li class="list-group-item">
-                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Plan Price')}
-                                    +{Lang::T('Additional Cost')})</small><span class="pull-right"
-                                    style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($plan['price']+$add_cost+$tax)}</span>
-                            </li>
-                        {else}
-                            <li class="list-group-item">
-                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Plan Price')} + {Lang::T('Tax')})</small><span
-                                    class="pull-right"
-                                    style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($plan['price']+$tax)}</span>
-                            </li>
-                        {/if}
-                    {else}
-                        {if $add_cost!=0}
-                            {foreach $bills as $k => $v}
-                                <li class="list-group-item">
-                                    <b>{$k}</b> <span class="pull-right">{Lang::moneyFormat($v)}</span>
-                                </li>
-                            {/foreach}
-                            <li class="list-group-item">
-                                <b>{Lang::T('Additional Cost')}</b> <span
-                                    class="pull-right">{Lang::moneyFormat($add_cost)}</span>
-                            </li>
-                            <li class="list-group-item">
-                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Plan Price')}
-                                    +{Lang::T('Additional Cost')})</small><span class="pull-right"
-                                    style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($plan['price']+$add_cost)}</span>
-                            </li>
-                        {else}
-                            <li class="list-group-item">
-                                <b>{Lang::T('Total')}</b> <span class="pull-right"
-                                    style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($plan['price'])}</span>
-                            </li>
-                        {/if}
-                    {/if}
-                </ul>
-                <center>
-                    <button type="submit" class="btn btn-primary">{Lang::T('Pay Now')}</button><br>
-                    <a class="btn btn-link" href="{$_url}home">{Lang::T('Cancel')}</a>
-                </center>
+
+                    <input type="hidden" name="plan_id" value="{$plan['id']}">
+                    <input type="hidden" name="gateway" value="mpesa">
+
+                    <!-- Pay Button -->
+                    <button type="submit"
+                            class="btn btn-success btn-lg btn-block"
+                            style="font-size: 18px; padding: 12px; margin-top: 20px;"
+                            v-bind:disabled="!isValidPhone || isProcessing">
+                        <i class="fa fa-money"></i> {Lang::T('Pay Now')}
+                    </button>
                 </form>
+
+                <!-- Status Messages -->
+                <div v-show="statusMessage"
+                     v-bind:class="['alert', alertClass]"
+                     style="margin-top: 20px; text-align: center;">
+                    <div>
+                        <i v-bind:class="['fa', 'fa-2x', statusIcon]"></i>
+                        <p style="margin-top: 10px;" v-text="statusMessage"></p>
+                        <button v-show="paymentFailed"
+                                v-on:click="resetPayment"
+                                class="btn btn-primary">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    const { createApp, ref, computed, watch, onBeforeUnmount } = Vue;
+
+    const MpesaPayment = {
+        delimiters: ['[[', ']]'],
+
+        setup() {
+            // State
+            const phone = ref('{$_user["phonenumber"]}');
+            const phoneError = ref('');
+            const statusMessage = ref('');
+            const isProcessing = ref(false);
+            const paymentFailed = ref(false);
+            const transactionId = ref(null);
+            const checkInterval = ref(null);
+            const attempts = ref(0);
+            const MAX_ATTEMPTS = 24;
+
+            // Computed properties
+            const isValidPhone = computed(() => {
+                return /^0[71][0-9]{literal}{8}{/literal}$/.test(phone.value);
+            });
+
+            const alertClass = computed(() => {
+                if (paymentFailed.value) return 'alert-danger';
+                if (statusMessage.value && statusMessage.value.includes('successful')) return 'alert-success';
+                return 'alert-info';
+            });
+
+            const statusIcon = computed(() => {
+                if (paymentFailed.value) return 'fa-exclamation-circle';
+                if (statusMessage.value && statusMessage.value.includes('successful')) return 'fa-check';
+                return 'fa-spinner fa-spin';
+            });
+
+            // Phone number validation
+            watch(phone, (newVal) => {
+                phone.value = newVal.replace(/[^0-9]/g, '');
+
+                if (phone.value.length > 0) {
+                    if (phone.value.length !== 10) {
+                        phoneError.value = 'Phone number must be 10 digits';
+                    } else if (!phone.value.startsWith('07') && !phone.value.startsWith('01')) {
+                        phoneError.value = 'Phone number must start with 07 or 01';
+                    } else {
+                        phoneError.value = '';
+                    }
+                } else {
+                    phoneError.value = '';
+                }
+            });
+
+            // Methods
+            const handleError = (message) => {
+                stopStatusCheck();
+                statusMessage.value = message;
+                isProcessing.value = false;
+                paymentFailed.value = true;
+            };
+
+            const resetPayment = () => {
+                stopStatusCheck();
+                statusMessage.value = '';
+                isProcessing.value = false;
+                paymentFailed.value = false;
+                transactionId.value = null;
+                attempts.value = 0;
+            };
+
+            const checkPaymentStatus = () => {
+                if (!transactionId.value || attempts.value >= MAX_ATTEMPTS) {
+                    handleError('Payment session expired. Please try again.');
+                    return;
+                }
+
+                attempts.value++;
+                statusMessage.value = 'Checking payment status...';
+
+                // Return a promise for better control flow
+                return $.ajax({
+                    url: '{$_url}order/view/' + transactionId.value + '/check',
+                    method: 'GET'
+                })
+                    .then((response) => {
+                        try {
+                            const result = JSON.parse(response);
+                            switch (result.status) {
+                                case 'COMPLETED':
+                                    stopStatusCheck();
+
+                                    statusMessage.value = 'Payment successful! Please wait while we sync your account...';
+                                    $.ajax({
+                                        url: '{$_url}home&sync=1&stoken={App::getToken()}',
+                                        method: 'GET'
+                                    }).then(() => {
+
+                                        setTimeout(() => {
+                                            window.location.href = '{$_url}home&mikrotik=login';
+                                        }, 2000);
+                                    });
+                                    break;
+
+                                case 'FAILED':
+                                    handleError(result.message || 'Payment failed');
+                                    break;
+
+                                case 'PENDING':
+                                    statusMessage.value = result.message || 'Waiting for payment confirmation...';
+                                    // Schedule next check only if status is pending
+                                    setTimeout(() => checkPaymentStatus(), 5000);
+                                    break;
+
+                                default:
+                                    handleError('Invalid payment status');
+                                    break;
+                            }
+                        } catch (error) {
+                            handleError('Failed to process server response');
+                        }
+                    })
+                    .fail(() => {
+                        // On network error, retry after delay
+                        statusMessage.value = 'Connection error, retrying...';
+                        setTimeout(() => checkPaymentStatus(), 5000);
+                    });
+            };
+
+            const startStatusCheck = () => {
+                // Clear any existing check
+                stopStatusCheck();
+                // Reset attempts
+                attempts.value = 0;
+                // Start first check
+                checkPaymentStatus();
+            };
+
+            const stopStatusCheck = () => {
+                // We don't need checkInterval anymore since we're using recursive setTimeout
+                attempts.value = MAX_ATTEMPTS; // This will prevent new checks from starting
+            };
+
+            const initiatePayment = (event) => {
+                if (!isValidPhone.value) return;
+
+                isProcessing.value = true;
+                paymentFailed.value = false;
+                statusMessage.value = 'Initiating payment...';
+                attempts.value = 0;
+
+                const formData = new FormData(event.target);
+                formData.append('phone_number', phone.value);
+
+                $.ajax({
+                    url: '{$_url}order/buy/{$route2}/{$route3}',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                })
+                    .done((response) => {
+                        try {
+                            const result = JSON.parse(response);
+                            if (result.success) {
+                                transactionId.value = result.transaction_id;
+                                statusMessage.value = 'Please check your phone to complete payment';
+                                startStatusCheck();
+                            } else {
+                                throw new Error(result.message || 'Failed to initiate payment');
+                            }
+                        } catch (error) {
+                            handleError(error.message || 'Failed to process server response');
+                        }
+                    })
+                    .fail(() => {
+                        handleError('Failed to connect to server');
+                    });
+            };
+
+            // Cleanup
+            onBeforeUnmount(() => {
+                stopStatusCheck();
+            });
+
+            return {
+                phone,
+                phoneError,
+                statusMessage,
+                isProcessing,
+                paymentFailed,
+                isValidPhone,
+                alertClass,
+                statusIcon,
+                initiatePayment,
+                resetPayment
+            };
+        }
+    };
+
+    const app = createApp(MpesaPayment);
+    app.mount('#mpesaApp');
+</script>
 
 {include file="customer/footer.tpl"}

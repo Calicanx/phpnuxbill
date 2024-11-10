@@ -124,7 +124,7 @@ if (isset($_GET['sync']) && !empty($_GET['sync'])) {
             }
         }
     }
-    r2(U . 'home', 's', $log);
+    r2(U . 'home&mikrotik=login', 's', $log);
 }
 
 if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {

@@ -157,7 +157,7 @@ switch ($action) {
             r2(U . "order/package", 'w', Lang::T("Payment not found"));
         }
         // jika url kosong, balikin ke buy, kecuali cancel
-        if ($trx['status'] == 1 && empty($trx['pg_url_payment']) && $routes['3'] != 'cancel') {
+        if ($trx['status'] == 1 && empty($trx['pg_url_payment']) &&( $routes['3'] != 'cancel' && $routes['3'] != 'check')) {
             r2(U . "order/buy/" . (($trx['routers_id'] == 0) ? $trx['routers'] : $trx['routers_id']) . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
         }
         if ($routes['3'] == 'check') {
@@ -167,7 +167,9 @@ switch ($action) {
             run_hook('customer_check_payment_status'); #HOOK
             include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $trx['gateway'] . '.php';
             call_user_func($trx['gateway'] . '_validate_config');
-            call_user_func($trx['gateway'] . '_get_status', $trx, $user);
+
+            return call_user_func($trx['gateway'] . '_get_status', $trx, $user);
+
         } else if ($routes['3'] == 'cancel') {
             run_hook('customer_cancel_payment'); #HOOK
             $trx->pg_paid_response = '{}';
@@ -541,7 +543,9 @@ switch ($action) {
         if (!$id) {
             r2(U . "order/package/" . $d['id'], 'e', Lang::T("Failed to create Transaction.."));
         } else {
-            call_user_func($gateway . '_create_transaction', $d, $user);
+            //Get phone number from post request
+            $phone = _post('phone_number');
+            return call_user_func($gateway . '_create_transaction', $d, $user, $phone);
         }
         break;
     default:
