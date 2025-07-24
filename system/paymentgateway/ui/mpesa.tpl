@@ -42,8 +42,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Callback URL</label>
                         <div class="col-md-6">
-                            <input type="text" readonly class="form-control" onclick="this.select()" value="{$_url}callback/mpesa">
-                            <span class="help-block">Copy this URL and set it in your Safaricom Developer Portal</span>
+                            <input type="text" class="form-control" id="mpesa_callback_url" name="mpesa_callback_url" placeholder="Enter Callback URL" value="{$_c['mpesa_callback_url']|default:$_url|cat:'callback/mpesa'}">
+                            <span class="help-block">Enter the Callback URL to be used in your Safaricom Developer Portal</span>
                         </div>
                     </div>
                     <div class="form-group">
